@@ -11,8 +11,11 @@
 <body>
     <script>
         //定義全域變數
-        var camera, scene, renderer, geometry, mesh, control;
+        var camera, scene, renderer, control;
+        var plane, mesh, material;
+        var box, boxmesh1, boxmaterial;
         var orbit , change ;
+
         init();
         animate();
 
@@ -25,51 +28,61 @@
                 renderer = new THREE.CanvasRenderer();
             }
 
-            //設定場景大小
             renderer.setSize(window.innerWidth, window.innerHeight);  
 
-            camera = new THREE.PerspectiveCamera(55, 640/480, 1, 10000);    //建立透視投影相機
-            camera.position.z = 1000;                                       //相機初始位置為原點，將相機拉回來一些，這樣才能看到原點
+            camera = new THREE.PerspectiveCamera(55, 640/480, 1, 10000);    
+            camera.position.x = 1000; 
+            camera.position.y = 1000;
+            //camera.position.z = 1000;                                      
 
-            //建立場景
             scene = new THREE.Scene();
 
+            //plane = new THREE.PlaneGeometry(200, 200, 10, 10);                              //THREE.PlaneGeometry = function(width[1], height[1], widthSegments[1], heightSegments[1])
+            //material = new THREE.MeshBasicMaterial({ color: 0xff0000});                     //使用顏色建立一個材質，呈現線方塊圖
+            //mesh = new THREE.Mesh(plane, material);                                         //根據模型和材質建立曲面
+            //scene.add(mesh);                                                                //將曲面增加到場景中
 
-            //建立一個平面物件：半徑、表面細節
-            geometry = new THREE.PlaneGeometry(200, 200, 10, 10);           //THREE.PlaneGeometry = function(width[1], height[1], widthSegments[1], heightSegments[1])
-            var material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true});    //使用顏色建立一個材質，呈現線方塊圖
-            mesh = new THREE.Mesh(geometry, material);                      //根據模型和材質建立曲面
-            scene.add(mesh);                                                //將曲面增加到場景中
+            box = new THREE.BoxGeometry(500,500,500,10,10,10);
+            boxmaterial = new THREE.MeshBasicMaterial({ color: 0xfff000});
+            boxmesh1 = new THREE.Mesh(box, boxmaterial);
+            scene.add(boxmesh1);
+
+            box2 = new THREE.BoxGeometry(300,300,300,5,5,5);
+            box2material = new THREE.MeshBasicMaterial({ color: 0xfff000,wireframe:true});
+            box2mesh1 = new THREE.Mesh(box2, box2material);
+            scene.add(box2mesh1);
 
             control = new THREE.DragControls([mesh], camera, renderer.domElement);
             orbit = new THREE.OrbitControls(camera, renderer.domElement);
-            orbit.target = new THREE.Vector3(0,0,0);
+            //orbit.target = new THREE.Vector3(0,0,0);
             
             control.addEventListener( 'dragstart', function ( event ) {
             } );
             control.addEventListener ( 'drag', function( event ){
-                event.object.position.y = 0;                                // This will prevent moving z axis, but will be on 0 line. change this to your object position of z axis.
+                event.object.position.y = 0;                                                // This will prevent moving z axis, but will be on 0 line. change this to your object position of z axis.
             })
             control.addEventListener( 'dragend', function ( event ) {
             } );
 
             change = new THREE.TransformControls(camera, renderer.domElement);
+            var localPlane = new THREE.Plane( new THREE.Vector3( 0, - 1, 0 ), 1 );
 
-            //將繪製器加到 DOM 結構中
+            var globalPlane = new THREE.Plane( new THREE.Vector3( 1, 0, 0 ), 1 );
+
+            renderer.clippingPlanes = [ globalPlane ];
+
+            //renderer.localClippingEnabled = true;
+
+            //var material = new THREE.MeshPhongMaterial( {clippingPlanes: [ localPlane ],clipShadows: true} );
+            
             document.body.appendChild(renderer.domElement);
         }
 
         //該函數用於實現一個計時器動畫
         function animate(){
-            //定時執行 animate() 函數
-            requestAnimationFrame(animate);
-
-            //旋轉
-            //mesh.rotation.x += 0.01;
-            //mesh.rotation.y += 0.02;
             
+            requestAnimationFrame(animate);
             orbit.update();
-            //使用指定的場景和相機繪製
             renderer.render(scene, camera);
         }
     </script><canvas width="640" height="480" style="width: 640px; height: 480px;"></canvas>
